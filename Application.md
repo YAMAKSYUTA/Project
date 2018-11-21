@@ -22,11 +22,11 @@
 
 **[ АППАРАТНЫЕ ТРЕБОВАНИЯ ]** 
 
-Процессор: Pentium III - 500 МГц
-RAM - 256 Mb
-HDD - 500 Mb
-Видеопамять - 64 Mb
-ОС - Windows XP/Vista
+Процессор: Pentium III - 500 МГц <br>
+RAM - 256 Mb <br>
+HDD - 500 Mb <br>
+Видеопамять - 64 Mb <br>
+ОС - Windows XP/Vista <br>
 
 **[ ФУНКЦИОНАЛЬНЫЕ ТРЕБОВАНИЯ ]**
 
