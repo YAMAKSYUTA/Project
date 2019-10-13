@@ -4,6 +4,7 @@ import telebot
 from telebot import types
 import misc
 import texts
+import teachers
 bot = telebot.TeleBot(misc.token)
 
 
@@ -55,6 +56,7 @@ def choose_class(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
+    # Первая регистрация
     if "10" <= call.data <= "13":
         data[call.message.chat.id].group = call.data
         if call.data == "11" or call.data == "10":
@@ -64,6 +66,7 @@ def callback_inline(call):
     elif "1" <= call.data <= "5":
         data[call.message.chat.id].kur_gr = call.data
         bot.delete_message(call.message.chat.id, call.message.message_id)
+    # ФД
     if call.data == "bi":
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.send_message(call.message.chat.id, "https://www.hse.ru/ba/bi/")
@@ -82,6 +85,17 @@ def callback_inline(call):
     elif call.data == "miem":
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.send_message(call.message.chat.id, "https://miem.hse.ru/")
+    # Учителя
+    if call.data in teachers.subjects:
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        keyboard = types.InlineKeyboardMarkup()
+        for teacher in teachers.subjects[call.data]:
+            keyboard.add(types.InlineKeyboardButton(text=teacher, callback_data=teacher))
+        bot.send_message(call.message.chat.id, "Выберите учителя:", reply_markup=keyboard)
+    if call.data in teachers.all_teachers:
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        bot.send_message(call.message.chat.id, call.data)
+    # TBC
 
 
 @bot.message_handler(commands=["ivr"])
@@ -110,6 +124,15 @@ def fd_info(message):
     button_6 = types.InlineKeyboardButton(text="БИ", callback_data="bi")
     keyboard.add(button_1, button_2, button_3, button_4, button_5, button_6)
     bot.send_message(message.chat.id, "Выберите интересующий вас факультетский день:", reply_markup=keyboard)
+
+
+@bot.message_handler(commands=["teachers"])
+def teacher_info(message):
+    keyboard = types.InlineKeyboardMarkup()
+    for subject in teachers.subjects:
+        button = types.InlineKeyboardButton(text=subject, callback_data=subject)
+        keyboard.add(button)
+    bot.send_message(message.chat.id, "Выберите предмет:", reply_markup=keyboard)
 
 
 if __name__ == '__main__':
