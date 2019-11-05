@@ -9,8 +9,6 @@ import re
 import json
 bot = telebot.TeleBot(misc.token)
 data = {}
-
-
 class User:
     group = ""
     kur_gr = ""
@@ -31,7 +29,7 @@ class User:
         "Базовая информатика": "",
         "Пользовательский курс": "",
         "Физкультура": "",
-        "История": ""
+        "История" : ""
     }
 
 
@@ -343,7 +341,8 @@ def add_lesson(message):
         try:
             with open('timetable.json', 'r') as t:
                   dat = json.load(t)
-            dat[text[1]][text[2]][text[3]][text[4]].append({"subject": text[5], "teacher": text[6], "cabinet": text[7]})
+            if text[5] in teachers.subjects and text != "Другое":
+                dat[text[1]][text[2]][text[3]][text[4]].append({"subject":text[5], "teacher":text[6], "cabinet":text[7]})
             with open('timetable.json', 'w') as t:
                 json.dump(dat, t)
             bot.send_message(message.chat.id, text="Изменения сохранены.")
@@ -354,7 +353,7 @@ def add_lesson(message):
 
 
 @bot.message_handler(commands=["delete_lesson"])
-def add_lesson(message):
+def delete_lesson(message):
     if message.from_user.username in moderators:
         text = re.split(r'&', message.text)
         try:
@@ -389,7 +388,7 @@ def edit_timetable(message):
                 if lesson["subject"] == text[5] and lesson["teacher"] == text[6] and lesson["cabinet"] == text[7]:
                     index = now
                 now += 1
-            if text[8] == "Предмет":
+            if text[8] == "Предмет" and text[8] in teachers.subjects and text[8] != "Другое":
                 dat[text[1]][text[2]][text[3]][text[4]][index]["subject"] = text[9]
             if text[8] == "Учитель":
                 dat[text[1]][text[2]][text[3]][text[4]][index]["teacher"] = text[9]
@@ -520,13 +519,14 @@ def answer_for_queries(message):
     flag_whole = True
     for cur in texts.all_texts:
         now = re.split(r'[\s,.!?]', cur)
+        print(now)
         for word in range(len(now)):
             now[word] = now[word].lower()
         for word in now:
             flag = True
             if word != "":
                 for check in text:
-                    if word in check:
+                    if word == check:
                         flag = False
                         flag_whole = False
                         bot.send_message(message.chat.id, "Возможно вы искали:\n" + cur)
@@ -542,7 +542,7 @@ def answer_for_queries(message):
             flag = True
             if word != "":
                 for check in text:
-                    if word in check:
+                    if word == check:
                         flag = False
                         flag_whole = False
                         bot.send_message(message.chat.id, "Возможно вы искали:\n" + info)
@@ -569,7 +569,7 @@ def callback_inline(call):
                                 text += "Четверг\n" + data[call.message.chat.id].fd + '\n\n'
                             text += day + "\n"
                             for num_of_lesson in dat[data[call.message.chat.id].group][data[call.message.chat.id].kur_gr][day]:
-                                text += num_of_lesson + "\n"
+                                text += num_of_lesson +"\n"
                                 flag = True
                                 for possible in dat[data[call.message.chat.id].group][data[call.message.chat.id].kur_gr][day][num_of_lesson]:
                                     if possible["subject"] in teachers.var_subjects:
@@ -615,14 +615,19 @@ def callback_inline(call):
                         text += "Четверг\n" + "Факультетский день" + '\n\n'
                     text += day + "\n"
                     for num_of_lesson in dat[group][num][day]:
+                        flag = True
                         text += num_of_lesson + "\n"
                         for possible in dat[group][num][day][num_of_lesson]:
                             if possible["subject"] in teachers.var_subjects:
+                                flag = False
                                 text += "Предмет: {0}\nУчитель: {1}\nКабинет: {2}\n".format(
                                     possible["subject"], possible["teacher"], possible["cabinet"])
                             else:
+                                flag = False
                                 text += "Предмет: {0}\nУчитель: {1}\nКабинет: {2}\n".format(
                                         possible["subject"], possible["teacher"], possible["cabinet"])
+                        if flag:
+                            text += "Нет уроков\n"
                         text += "\n"
                 bot.send_message(call.message.chat.id, text=text)
         except:
@@ -638,7 +643,8 @@ def callback_inline(call):
                 for num_of_lesson in dat[data[call.message.chat.id].group][data[call.message.chat.id].kur_gr][day]:
                     text += num_of_lesson + "\n"
                     flag = True
-                    for possible in dat[data[call.message.chat.id].group][data[call.message.chat.id].kur_gr][day][num_of_lesson]:
+                    for possible in dat[data[call.message.chat.id].group][data[call.message.chat.id].kur_gr][day][
+                        num_of_lesson]:
                         if possible["subject"] in teachers.var_subjects:
                             if possible["subject"] == data[call.message.chat.id].dop_subj:
                                 flag = False
